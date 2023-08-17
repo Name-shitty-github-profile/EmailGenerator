@@ -8,37 +8,16 @@ if (!fs.existsSync('emails.txt')) {
 } else {
     emails = fs.readFileSync('emails.txt', 'utf8').split('\n');
 }
-let currentLength = emails.length;
-let curr = 0;
+let currentLength = emails[emails.length - 1].split('@')[0].length;
 const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
 const domains = [
-    '@gmail.com',
-    '@yahoo.com',
-    '@hotmail.com',
-    '@outlook.com'
+    'gmail.com',
+    'yahoo.com',
+    'hotmail.com',
+    'outlook.com'
 ];
 let validEmails = 0;
-function genEmail() {
-    let currentChars = ''
-    for (let i = 0; i < currentLength; i++) {
-        currentChars += chars.charAt(Math.floor(Math.random() * chars.length));
-    }
-    curr += currentLength;
-    if (curr >=  chars.length * currentLength) {
-        currentLength += 1;
-        curr = 0;
-    }
-    let all = [];
-    for (let i = 0; i < domains.length; i++) {
-        all.push(currentChars + domains[i]);
-    }
-    for (let i = 0; i < all.length; i++) {
-        if (emails.includes(all[i])) {
-            return genEmail();
-        }
-    }
-    return all;
-}
+let validEmailss = 0;
 
 async function verifyEmail(email) {
     const domain = email.split('@')[1];
@@ -77,17 +56,40 @@ function verifyEmailSync(email) {
     });
 }
 
-while (true) {
-    for (let i = 0; i < 500; i++) {
-        for (const email of genEmail()) {
-            if (verifyEmailSync(email)) {
-                validEmails += 1;
-                console.log(`${email} is valid`);
-                console.log(`${validEmails}`);
-                emails.push(email);
+function genEmail() {
+    const validEmails = [];
+    let validEmailss = 0;
+    let possibilities = 0;
+    const possiblitiesLength = Math.pow(chars.length, currentLength);
+
+    while (possibilities < possiblitiesLength) {
+        let newPossibility = "";
+        let temp = possibilities;
+
+        for (let i = 0; i < currentLength; i++) {
+            const charIndex = temp % chars.length;
+            newPossibility += chars.charAt(charIndex);
+            temp = Math.floor(temp / chars.length);
+        }
+
+        for (const domain of domains) {
+            const emaill = `${newPossibility}@${domain}`;
+            if (!validEmails.includes(emaill) && verifyEmailSync(emaill)) {
+                validEmails.push(emaill);
+                validEmailss += 1;
+                console.log(`${emaill} is valid | ${validEmailss}`);
+                if (validEmailss === 500) {
+                    validEmailss = 0;
+                    console.log("Writing emails to file");
+                    fs.writeFileSync('emails.txt', validEmails.join('\n'));
+                }
             }
         }
+        possibilities += 1;
     }
-    console.log("Writting emails to file");
-    fs.writeFileSync('emails.txt', emails.join('\n'));
+}
+
+while (true) {
+    genEmail();
+    currentLength += 1;
 }
