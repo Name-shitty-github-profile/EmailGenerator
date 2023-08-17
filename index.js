@@ -78,12 +78,16 @@ function verifyEmailSync(email) {
 }
 
 while (true) {
-    for (const email of genEmail()) {
-        if (verifyEmailSync(email)) {
-            validEmails += 1;
-            console.log(`${email} is valid`);
-            console.log(`${validEmails}`);
-            fs.appendFile('emails.txt', `${email}\n`, (err) => {});
+    for (let i = 0; i < 500; i++) {
+        for (const email of genEmail()) {
+            if (verifyEmailSync(email)) {
+                validEmails += 1;
+                console.log(`${email} is valid`);
+                console.log(`${validEmails}`);
+                emails.push(email);
+            }
         }
     }
+    console.log("Writting emails to file");
+    fs.writeFileSync('emails.txt', emails.join('\n'));
 }
