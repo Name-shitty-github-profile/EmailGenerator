@@ -1,11 +1,12 @@
 const fs = require('fs');
 const dns = require('dns');
 const net = require('net');
+let emails = [];
 if (!fs.existsSync('emails.txt')) {
     fs.writeFileSync('emails.txt', '');
-    const emails = [];
+    emails = [];
 } else {
-    const emails = fs.readFileSync('emails.txt', 'utf8').split('\n');
+    emails = fs.readFileSync('emails.txt', 'utf8').split('\n');
 }
 let currentLength = emails.length;
 let curr = 0;
@@ -23,7 +24,7 @@ function genEmail() {
         currentChars += chars.charAt(Math.floor(Math.random() * chars.length));
     }
     curr += currentLength;
-    if (curr >=  chars * currentLength) {
+    if (curr >=  chars.length * currentLength) {
         currentLength += 1;
         curr = 0;
     }
@@ -68,9 +69,17 @@ async function verifyEmail(email) {
     }
 }
 
+function verifyEmailSync(email) {
+    return new Promise((resolve, reject) => {
+        verifyEmail(email).then(result => {
+            resolve(result);
+        });
+    });
+}
+
 while (true) {
     for (const email of genEmail()) {
-        if (verifyEmail(email)) {
+        if (verifyEmailSync(email)) {
             validEmails += 1;
             console.log(`${email} is valid`);
             console.log(`${validEmails}`);
