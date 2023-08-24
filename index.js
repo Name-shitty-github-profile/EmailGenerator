@@ -16,6 +16,8 @@ const domains = [
     'hotmail.com',
     'outlook.com'
 ];
+let validEmails = 0;
+let validEmailss = 0;
 
 async function verifyEmail(email) {
     const domain = email.split('@')[1];
@@ -69,7 +71,7 @@ function genEmail() {
         let current;
         for (const domain of domains) {
             current = email + domain;
-            if (!validEmails.includes(current) && verifyEmailSync(current)) {
+            if (!validEmails.includes(current) && !emails.includes(current) && verifyEmailSync(current)) {
                 validEmails.push(current);
             }
         }
@@ -87,6 +89,7 @@ function genEmail() {
         }
     }
     fs.writeFileSync('emails.txt', [...validEmails, ...emails].join('\n'));
+    emails = [...validEmails, ...emails];
 }
 
 while (true) {
