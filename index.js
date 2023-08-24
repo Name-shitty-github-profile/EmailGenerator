@@ -9,7 +9,7 @@ if (!fs.existsSync('emails.txt')) {
     emails = fs.readFileSync('emails.txt', 'utf8').split('\n');
 }
 let currentLength = emails[emails.length - 1].split('@')[0].length;
-const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+const chars = 'abcdefghijklmnopqrstuvwxyz0123456789';
 const domains = [
     'gmail.com',
     'yahoo.com',
@@ -57,36 +57,38 @@ function verifyEmailSync(email) {
 }
 
 function genEmail() {
-    const validEmails = [];
-    let validEmailss = 0;
-    let possibilities = 0;
-    const possiblitiesLength = Math.pow(chars.length, currentLength);
-
-    while (possibilities < possiblitiesLength) {
-        let newPossibility = "";
-        let temp = possibilities;
-
-        for (let i = 0; i < currentLength; i++) {
-            const charIndex = temp % chars.length;
-            newPossibility += chars.charAt(charIndex);
-            temp = Math.floor(temp / chars.length);
+    let num = Math.pow(36, currentLength - 1) * 100;
+    let maxnum = Math.pow(36, currentLength) - 1;
+    let nums = String(Math.pow(10, currentLength - 1) * 100).split('');
+    let validEmails = [];
+    let ctn = 0;
+    while (num < maxnum) {
+        let email = "";
+        for (const cnum of nums) {
+            email += chars.charAt(cnum);
         }
-
+        email += '@';
+        let current;
         for (const domain of domains) {
-            const emaill = `${newPossibility}@${domain}`;
-            if (!validEmails.includes(emaill) && verifyEmailSync(emaill)) {
-                validEmails.push(emaill);
-                validEmailss += 1;
-                console.log(`${emaill} is valid | ${validEmailss}`);
-                if (validEmailss === 500) {
-                    validEmailss = 0;
-                    console.log("Writing emails to file");
-                    fs.writeFileSync('emails.txt', validEmails.join('\n'));
-                }
+            current = email + domain;
+            if (!validEmails.includes(current) && verifyEmailSync(current)) {
+                validEmails.push(current);
             }
         }
-        possibilities += 1;
+        num += 1;
+        nums[charArray.length - 1] += 1;
+        for (let i = 0; i > nums.length; i++) {
+            if (nums[i] >= 36) {
+                nums[i] = 0;
+                nums[i + 1] += 1;
+            }
+        }
+        ctn += 1;
+        if (ctn === 500) {
+            fs.writeFileSync('emails.txt', [...validEmails, ...emails].join('\n'));
+        }
     }
+    fs.writeFileSync('emails.txt', [...validEmails, ...emails].join('\n'));
 }
 
 while (true) {
