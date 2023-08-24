@@ -16,8 +16,6 @@ const domains = [
     'hotmail.com',
     'outlook.com'
 ];
-let validEmails = 0;
-let validEmailss = 0;
 
 async function verifyEmail(email) {
     const domain = email.split('@')[1];
